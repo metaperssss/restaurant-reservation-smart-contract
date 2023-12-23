@@ -56,11 +56,13 @@ export function getRestaurants(): Result<Vec<Restaurant>, string> {
 
 $query;
 export function getRestaurant(id: string): Result<Restaurant, string> {
-  return match(restaurants.get(id), {
-    Some: (restaurant) => Result.Ok<Restaurant, string>(restaurant),
-    None: () =>
-      Result.Err<Restaurant, string>(`Restaurant with id=${id} not found`),
-  });
+  const restaurant = restaurants.get(id);
+
+  if (restaurant) {
+    return Result.Ok(restaurant);
+  } else {
+    return Result.Err(`Restaurant with id=${id} not found`);
+  }
 }
 
 $update;
@@ -80,28 +82,29 @@ export function updateRestaurant(
   id: string,
   payload: Omit<Restaurant, "id">
 ): Result<Restaurant, string> {
-  return match(restaurants.get(id), {
-    Some: (restaurant) => {
-      const updatedRestaurant: Restaurant = {
-        ...restaurant,
-        ...payload,
-      };
-      restaurants.insert(updatedRestaurant.id, updatedRestaurant);
-      return Result.Ok<Restaurant, string>(updatedRestaurant);
-    },
-    None: () =>
-      Result.Err<Restaurant, string>(`Restaurant with id=${id} not found`),
-  });
+  const existingRestaurant = restaurants.get(id);
+
+  if (existingRestaurant) {
+    const updatedRestaurant: Restaurant = {
+      ...existingRestaurant,
+      ...payload,
+    };
+    restaurants.insert(updatedRestaurant.id, updatedRestaurant);
+    return Result.Ok(updatedRestaurant);
+  } else {
+    return Result.Err(`Restaurant with id=${id} not found`);
+  }
 }
 
 $update;
 export function deleteRestaurant(id: string): Result<Restaurant, string> {
-  return match(restaurants.remove(id), {
-    Some: (deletedRestaurant) =>
-      Result.Ok<Restaurant, string>(deletedRestaurant),
-    None: () =>
-      Result.Err<Restaurant, string>(`Restaurant with id=${id} not found`),
-  });
+  const existingRestaurant = restaurants.remove(id);
+
+  if (existingRestaurant) {
+    return Result.Ok(existingRestaurant);
+  } else {
+    return Result.Err(`Restaurant with id=${id} not found`);
+  }
 }
 
 // Reservations
@@ -112,11 +115,13 @@ export function getReservations(): Result<Vec<Reservation>, string> {
 
 $query;
 export function getReservation(id: string): Result<Reservation, string> {
-  return match(reservations.get(id), {
-    Some: (reservation) => Result.Ok<Reservation, string>(reservation),
-    None: () =>
-      Result.Err<Reservation, string>(`Reservation with id=${id} not found`),
-  });
+  const reservation = reservations.get(id);
+
+  if (reservation) {
+    return Result.Ok(reservation);
+  } else {
+    return Result.Err(`Reservation with id=${id} not found`);
+  }
 }
 
 $update;
@@ -142,36 +147,36 @@ export function updateReservation(
   id: string,
   payload: Omit<Reservation, "id" | "createdAt">
 ): Result<Reservation, string> {
-  return match(reservations.get(id), {
-    Some: (reservation) => {
-      const updatedReservation: Reservation = {
-        ...reservation,
-        ...payload,
-        updatedAt: Opt.Some(ic.time()),
-      };
-      reservations.insert(id, updatedReservation);
-      return Result.Ok<Reservation, string>(updatedReservation);
-    },
-    None: () =>
-      Result.Err<Reservation, string>(`Reservation with id=${id} not found`),
-  });
+  const existingReservation = reservations.get(id);
+
+  if (existingReservation) {
+    const updatedReservation: Reservation = {
+      ...existingReservation,
+      ...payload,
+      updatedAt: Opt.Some(ic.time()),
+    };
+    reservations.insert(id, updatedReservation);
+    return Result.Ok(updatedReservation);
+  } else {
+    return Result.Err(`Reservation with id=${id} not found`);
+  }
 }
 
 $update;
 export function cancelReservation(id: string): Result<Reservation, string> {
-  return match(reservations.get(id), {
-    Some: (reservation) => {
-      const cancelledReservation: Reservation = {
-        ...reservation,
-        status: "cancelled",
-        updatedAt: Opt.Some(ic.time()),
-      };
-      reservations.insert(id, cancelledReservation);
-      return Result.Ok<Reservation, string>(cancelledReservation);
-    },
-    None: () =>
-      Result.Err<Reservation, string>(`Reservation with id=${id} not found`),
-  });
+  const existingReservation = reservations.get(id);
+
+  if (existingReservation) {
+    const cancelledReservation: Reservation = {
+      ...existingReservation,
+      status: "cancelled",
+      updatedAt: Opt.Some(ic.time()),
+    };
+    reservations.insert(id, cancelledReservation);
+    return Result.Ok(cancelledReservation);
+  } else {
+    return Result.Err(`Reservation with id=${id} not found`);
+  }
 }
 
 // a workaround to make uuid package work with Azle
