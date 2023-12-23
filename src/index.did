@@ -1,22 +1,55 @@
-type Message = record {
+type OpeningHours = record { end : text; start : text };
+type Reservation = record {
   id : text;
-  attachmentURL : text;
-  title : text;
-  body : text;
+  status : ReservationStatus;
+  contactInfo : text;
+  date : text;
   createdAt : nat64;
+  time : text;
+  tableId : float64;
+  restaurantId : text;
   updatedAt : opt nat64;
+  partySize : float64;
 };
-type MessagePayload = record {
-  attachmentURL : text;
-  title : text;
-  body : text;
+type ReservationPayload = record {
+  status : ReservationStatus;
+  contactInfo : text;
+  date : text;
+  time : text;
+  tableId : float64;
+  restaurantId : text;
+  partySize : float64;
 };
-type _AzleResult = variant { Ok : Message; Err : text };
-type _AzleResult_1 = variant { Ok : vec Message; Err : text };
+type ReservationStatus = variant { cancelled; pending; confirmed };
+type Restaurant = record {
+  id : text;
+  name : text;
+  tables : vec Table;
+  openingHours : OpeningHours;
+  capacity : float64;
+  location : text;
+};
+type RestaurantPayload = record {
+  name : text;
+  tables : vec Table;
+  openingHours : OpeningHours;
+  capacity : float64;
+  location : text;
+};
+type Table = record { id : float64; available : bool };
+type _AzleResult = variant { Ok : Restaurant; Err : text };
+type _AzleResult_1 = variant { Ok : Reservation; Err : text };
+type _AzleResult_2 = variant { Ok : vec Reservation; Err : text };
+type _AzleResult_3 = variant { Ok : vec Restaurant; Err : text };
 service : () -> {
-  addMessage : (MessagePayload) -> (_AzleResult);
-  deleteMessage : (text) -> (_AzleResult);
-  getMessage : (text) -> (_AzleResult) query;
-  getMessages : () -> (_AzleResult_1) query;
-  updateMessage : (text, MessagePayload) -> (_AzleResult);
+  addRestaurant : (RestaurantPayload) -> (_AzleResult);
+  cancelReservation : (text) -> (_AzleResult_1);
+  createReservation : (ReservationPayload) -> (_AzleResult_1);
+  deleteRestaurant : (text) -> (_AzleResult);
+  getReservation : (text) -> (_AzleResult_1) query;
+  getReservations : () -> (_AzleResult_2) query;
+  getRestaurant : (text) -> (_AzleResult) query;
+  getRestaurants : () -> (_AzleResult_3) query;
+  updateReservation : (text, ReservationPayload) -> (_AzleResult_1);
+  updateRestaurant : (text, RestaurantPayload) -> (_AzleResult);
 }
